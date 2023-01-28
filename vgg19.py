@@ -1,12 +1,24 @@
 from torchvision.models import vgg19 
 from torch import nn
 from torchvision.models.feature_extraction import create_feature_extractor 
+import torch
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 class VGG19(nn.Module):
     def __init__(self):
         super().__init__()
 
         self.vgg19 = vgg19(weights='IMAGENET1K_V1').features
+
+
+        for param in self.vgg19.parameters():
+            param.requires_grad_(False)
+
+        for idx, module in enumerate(self.vgg19):
+            if hasattr(module, 'inplace'):
+                self.vgg19[idx].inplace = False
+
         self.model = create_feature_extractor(self.vgg19, {
             '0': 'conv1_1',
             '5': 'conv2_1',
@@ -16,5 +28,5 @@ class VGG19(nn.Module):
         })
 
     def forward(self, x):
-        x = self.model(x)
-        return x
+        output = self.model(x)
+        return output
