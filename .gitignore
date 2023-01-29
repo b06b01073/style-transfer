@@ -1,1 +1,4 @@
 helper.py
+images/result/*.jpg
+images/style_representation/*.jpg
+images/content_representation/*.jpg

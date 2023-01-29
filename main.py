@@ -2,64 +2,58 @@ from torchvision import transforms
 from torchvision.utils import save_image
 import torch
 
+import argparse
 
 from PIL import Image
-from collections import defaultdict
 import os
+import logging
 
 from vgg19 import VGG19
 from loss import StyleTransferLoss
 
-def main():
+def main(output, content, style, iters, alpha, beta, lr, saved_dir):
     model = VGG19()
 
-    content_representation, style_representation = get_representations(model)
+    content_representation, style_representation = get_representations(model, content, style)
 
-    output_img = read_img('images/input_images/noise.jpg')
+    output_img = read_img(output)
     output_img_tensor = transform_img(output_img)
 
-    criterion = StyleTransferLoss(alpha=1, beta=1)
-    optim = torch.optim.LBFGS([output_img_tensor], lr=1e-2)
+    criterion = StyleTransferLoss(alpha=alpha, beta=beta)
+    optim = torch.optim.LBFGS([output_img_tensor], lr=lr)
 
     output_img_tensor.requires_grad_(True)
 
-    criterion = torch.nn.MSELoss()
-
-
-    for i in range(50):
+    for i in range(iters):
 
         def closure():
             output_representation = model(output_img_tensor)
             optim.zero_grad()
 
-                # loss = criterion(flattened_output, content_representation, style_representation)
-            loss = criterion(output_representation['conv4_1'], content_representation['conv4_1'])
+            loss = criterion(output_representation, content_representation, style_representation)
             # loss += torch.nn.MSELoss()(output_img_tensor, torch.zeros((3, 224, 224))) 
             loss.backward()
-            print(loss)
+            logging.info(f'loss: {loss.item()}')
             return loss
 
         optim.step(closure)
 
-        save_image(output_img_tensor, f'images/result/{i}.jpg')
+        img_path = os.path.dirname(__file__)
+        img_path = os.path.join(img_path, saved_dir, f'{i}.jpg')
+        logging.info(f'{img_path} saved')
+        save_image(output_img_tensor, img_path)
 
 
-def get_representations(model, visualize=False):
+def get_representations(model, content, style):
     '''precompute the data of Gram matrix in style representation and the content representation 
     '''
-    content_img = read_img('images/content_images/cat.jpg')
+    content_img = read_img(content)
     content_img_tensor = transform_img(content_img)
     content_representation = model(content_img_tensor)
 
-
-
-    style_img = read_img('images/style_images/water_painting.jpg')
+    style_img = read_img(style)
     style_img_tensor = transform_img(style_img)
     style_representation = model(style_img_tensor)
-
-    if visualize:
-        visualize_filter(style_representation, 'images/style_representation')
-
 
     return content_representation, style_representation
     
@@ -79,20 +73,22 @@ def transform_img(img):
 
     return transformer(img)
 
-def visualize_filter(representation, path):
-    for k, v in representation.items():
-        save_image(v.unsqueeze(0), os.path.join(path, f'{k}.png'))
-
-def get_gram_matrices(style_representations):
-    for layer_name, filter in style_representations.items():
-        filter_trans = torch.transpose(filter, 0, 1)
-        style_representations[layer_name] = torch.matmul(filter, filter_trans)
-
-def flatten_representation(representation):
-    flattened_representation = defaultdict()
-    for layer_name, filter in representation.items():
-        flattened_representation[layer_name] = torch.flatten(filter, start_dim=1)
-    return flattened_representation
-
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--output', type=str, default='images/content_images/cat.jpg')
+    parser.add_argument('--content', type=str, default='images/content_images/cat.jpg')
+    parser.add_argument('--style', type=str, default='images/style_images/sunrise.jpg')
+    parser.add_argument('--iters', type=int, default=100)
+    parser.add_argument('--alpha', type=float, default=1)
+    parser.add_argument('--beta', type=float, default=1e4)
+    parser.add_argument('--lr', type=float, default=1e-2)
+    parser.add_argument('--saved_dir', type=str, default='images/result')
+    parser.add_argument('--quite', '-q', action='store_true')
+
+    args = parser.parse_args()
+
+    if not args.quite:
+        logging.basicConfig(level=logging.INFO)
+
+    main(args.output, args.content, args.style, args.iters, args.alpha, args.beta, args.lr, args.saved_dir)
