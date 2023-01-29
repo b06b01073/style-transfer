@@ -51,6 +51,13 @@ $\alpha/\beta=10^{-3}$ for all results below.
   <img src="./images/readme_result/styles/scream.jpg" />
 </p>
 
+#### Mosaic Texture
+Note that $\alpha/\beta$ is set to $10^{-5}$ for this specific result to show the texture of mosaic.
+
+<p align="center">
+  <img src="./images/readme_result/styles/mosaic.jpg" />
+</p>
+
 
 ## References
 [1] L. A. Gatys, A. S. Ecker and M. Bethge, Image Style Transfer Using Convolutional Neural Networks, 2016 IEEE Conference on Computer Vision and Pattern Recognition (CVPR), Las Vegas, NV, USA, 2016, pp. 2414-2423, doi: 10.1109/CVPR.2016.265.
