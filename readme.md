@@ -16,6 +16,8 @@ If without specifying, the default content and style image used are showed below
   <img src="./images/readme_result/content_style.jpg" />
 </p>
 
+content image source: https://www.purina.co.uk/find-a-pet/cat-breeds/norwegian-forest
+
 Note that all the image sizes are resize to (224, 224). 
 
 ### $\alpha/\beta$ Ratios
