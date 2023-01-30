@@ -4,8 +4,7 @@
 This is an implementation of the paper "Image Style Transfer Using Convolutional Neural Networks"[1]. In this project, I use the VGG19[2] as the backbone for image feature extraction. The VGG19 extracts the content representation of the content image and the intermediate style representation of the style image. The final style representation is derived from the result of second order polynomial kernel of the intermediate style representation[3].
 
 Note: During the feature extraction step, I use the output from the ReLU layer instead of convolutional layer, since the original paper[1] stated that "So the responses in a layer $l$ can be stored in a matrix $F^l ∈ R^{N_{l}×M_{l}}$ where $F^{l}_{ij}$ is the **activation** of the $i$ th filter at position $j$ in layer $l$.". Also, the research paper by (Ulyanov et al.)[4] stated that "Similar to (Gatys
-et al., 2015a), the texture loss uses the layers $L_T =\{relu1\_1, relu2\_1, relu3\_1, relu4\_1, relu5\_1\}$ of VGG-19 and the content loss the layer $L_C =
-\{relu4\_2\}."$
+et al., 2015a), the texture loss uses the layers $L_T =\{relu1\_1, relu2\_1, relu3\_1, relu4\_1, relu5\_1\}$ of VGG-19 and the content loss the layer $L_C = \{relu4\_2\}.$".
 
 While generating the output image, the neural style transfer algorithm tries to minimize both the style loss and the content loss. However, the style loss and the content loss contradicts to each other in most cases(if the output image is "closer" to the content image, then it should be "farther" from the style image, and vice versa). Therefore, the final output image is at a balance point that possess both the content information from the content image and the texture from the style image.
 
